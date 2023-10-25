@@ -1,7 +1,9 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs").promises; // Allow for async/await
+const uid = require("uid");
 
+const UID_LENGTH = 16;
 const PORT = 3001;
 
 const app = express();
@@ -9,6 +11,7 @@ const app = express();
 let dbData; // Will contain the data from db.json
 
 app.use(express.json()); // Needed for header 'Content-Type': 'application/json'
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
@@ -32,7 +35,8 @@ app.post("/api/notes", async (req, res) => {
     // Create new note object
     let newNote = {
         title: title,
-        text: text
+        text: text,
+        id: uid.uid(UID_LENGTH), // Add a new unique id to each new note
     }
 
     let dbData = JSON.parse(await getDbData()); // Get most updated file data
@@ -41,7 +45,7 @@ app.post("/api/notes", async (req, res) => {
     const err = await fs.writeFile("./db/db.json", JSON.stringify(dbData, null, 4));
     err ? console.error(err) : console.log("added new note");
     res.send(dbData);
-})
+});
 
 
 app.listen(PORT, async () => {
@@ -55,6 +59,12 @@ app.listen(PORT, async () => {
  * @returns Object containing the .json file's data
  */
 async function getDbData() {
-    const data = await fs.readFile("./db/db.json", "utf8");
-    return data;
+    try {
+        const data = await fs.readFile("./db/db.json", "utf8");
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+
+    return ;
 }
