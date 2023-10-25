@@ -1,7 +1,6 @@
 const express = require("express");
 const path = require("path");
-const fs = require("fs");
-const db = require("./db/db.json");
+const fs = require("fs").promises; // Allow for async/await
 
 const PORT = 3001;
 
@@ -20,42 +19,42 @@ app.get("/notes", (req, res) => {
     res.sendFile(path.join(__dirname, "public/notes.html"));
 })
 
-app.get("/api/notes", (req, res) => {
-    res.send(db);
+app.get("/api/notes", async (req, res) => {
+    res.send(await getDbData()); // Always get the most updated file data
 })
 
 // Saving a note
-app.post("/api/notes", (req, res) => {
+app.post("/api/notes", async (req, res) => {
     const body = req.body;
     const title = body.title;
     const text = body.text;
 
-    let note = {
+    // Create new note object
+    let newNote = {
         title: title,
         text: text
     }
 
-    dbData.push(note);
+    let dbData = JSON.parse(await getDbData()); // Get most updated file data
+    dbData.push(newNote); // Add new note to json array
 
-    fs.writeFile("./db/db.json", JSON.stringify(dbData, null, 4), (err) => {
-        err ? console.error(err) : console.log("added new note");
-        
-        // Send the note data regardless
-        res.send(db);
-    })
+    const err = await fs.writeFile("./db/db.json", JSON.stringify(dbData, null, 4));
+    err ? console.error(err) : console.log("added new note");
+    res.send(dbData);
 })
 
 
-app.listen(PORT, () => {
-    console.log(`Listening at http://localhost:${PORT}`)
-
-    // Read in json data when server starts
-    fs.readFile("./db/db.json", "utf8", (err, data) => {
-        if (err) {
-            console.error(err);
-            return
-        }
-
-        dbData = JSON.parse(data);
-    })
+app.listen(PORT, async () => {
+    console.log(`Listening at http://localhost:${PORT}`);
 })
+
+
+/**
+ * Async function to get the data from db.json.
+ * This will be called to get the most updated version of the file's data.
+ * @returns Object containing the .json file's data
+ */
+async function getDbData() {
+    const data = await fs.readFile("./db/db.json", "utf8");
+    return data;
+}
