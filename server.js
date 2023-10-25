@@ -34,23 +34,55 @@ app.post("/api/notes", async (req, res) => {
 
     // Create new note object
     let newNote = {
-        title: title,
-        text: text,
-        id: uid.uid(UID_LENGTH), // Add a new unique id to each new note
+        "title": title,
+        "text": text,
+        "id": uid.uid(UID_LENGTH), // Add a new unique id to each new note
     }
 
     let dbData = JSON.parse(await getDbData()); // Get most updated file data
     dbData.push(newNote); // Add new note to json array
 
-    const err = await fs.writeFile("./db/db.json", JSON.stringify(dbData, null, 4));
-    err ? console.error(err) : console.log("added new note");
-    res.send(dbData);
+    try {
+        await fs.writeFile("./db/db.json", JSON.stringify(dbData, null, 4));
+        // console.log("added note");
+        res.send(dbData);
+    } catch (error) {
+        console.error(error)
+        res.sendStatus(500);
+    }
+});
+
+
+app.delete("/api/notes/:id", async (req, res) => {
+    const idToDelete = req.params.id;
+
+    if (idToDelete) {
+        let dbData = JSON.parse(await getDbData()); // Get most updated file data
+        
+        // Find the id in the json file and delete the corresponding note
+        for (let i = 0; i < dbData.length; i++) {
+            if (dbData[i].id === idToDelete) {
+                dbData.splice(i, 1);
+            }
+        }
+
+        try {
+            await fs.writeFile("./db/db.json", JSON.stringify(dbData, null, 4));
+            // console.log("deleted note");
+            res.send(dbData);
+        } catch (error) {
+            console.error(error)
+            res.sendStatus(500);
+        }
+    } else {
+        res.sendStatus(500);
+    }
 });
 
 
 app.listen(PORT, async () => {
     console.log(`Listening at http://localhost:${PORT}`);
-})
+});
 
 
 /**
