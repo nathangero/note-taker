@@ -4,7 +4,7 @@ const fs = require("fs").promises; // Allow for async/await
 const uid = require("uid");
 
 const UID_LENGTH = 16;
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 const app = express();
 
