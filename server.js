@@ -45,7 +45,7 @@ app.post("/api/notes", async (req, res) => {
     try {
         await fs.writeFile("./db/db.json", JSON.stringify(dbData, null, 4));
         // console.log("added note");
-        res.send(dbData);
+        res.send(dbData); // Return the updated note data
     } catch (error) {
         console.error(error)
         res.sendStatus(500);
