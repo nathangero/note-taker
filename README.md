@@ -2,9 +2,25 @@
 
 ## Description
 
+
+
+Heroku link: [https://note-taker-nathangero-9af003f4c921.herokuapp.com](https://note-taker-nathangero-9af003f4c921.herokuapp.com)
+
 ## Installation
 
+
 ## Usage
+
+
+## Code Snippets
+
+
+## Images
+
+Image of the website
+
+<img src="./public/assets/images/website.PNG" width="600px" height="auto" alt="Image of the website showing a selected note on the right and previous notes on the left.">
+
 
 ## Credits
 
